@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import lights_control
 
@@ -43,7 +45,9 @@ class PygameInterface:
             self.polygon = polygon
             self.light = light
             self.font = font
-            self.text_render = self.font.render(f"{name} {self.light.address}", True, (0, 0, 0))
+            #creates a random color for the text and the zone polygon
+            self.color = (random.randint(0, 255),random.randint(0, 199),random.randint(0, 255))
+            self.text_render = self.font.render(f"{name} {self.light.address}", True, self.color)
             self.recap = PygameInterface.Button(pos_x,pos_y,width,height,self.text_render)
 
     def adjust_frame(self, frame_rgb):
@@ -136,6 +140,7 @@ class PygameInterface:
         pos_y = len(self.zones) * (recap_height + margin)
         zone = self.Zone(zone_name,self.font,zone_polygon,zone_light,pos_x,pos_y,recap_width,recap_height)
         self.zones.append(zone)
+
     def delete_zones(self):
         """removes all the zones on the interface"""
         self.zones.clear()
@@ -144,7 +149,7 @@ class PygameInterface:
         # Cycles all thr points and connects them with a line
         for zone in self.zones:
             points = list(zone.polygon.exterior.coords)
-            self.draw_empty_rectangle(points, [255, 150, 0], 4)
+            self.draw_empty_rectangle(points, zone.color, 4)
     def update_text(self, button):
         """updates the text of the button clicked"""
         if button in self.buttons:
