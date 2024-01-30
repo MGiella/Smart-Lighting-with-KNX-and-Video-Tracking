@@ -26,11 +26,6 @@ class Light:
         # The light is switched off at the start
         asyncio.run(self.lights_update(0))
 
-    def get_state(self):
-        current_state = self._state_lock.get(True)
-        self._state_lock.put(current_state)
-        self.state = current_state
-        return current_state
 
     def light_on(self):
         """switch on the light if the light is off, if the timer is still running, set the state as True"""

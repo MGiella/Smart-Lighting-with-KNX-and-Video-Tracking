@@ -1,4 +1,5 @@
 import ast
+import sys
 
 import cv2
 import pygame
@@ -32,7 +33,7 @@ def pygame_event_actions(interface):
                 cap.release()
                 cv2.destroyAllWindows()
                 pygame.quit()
-                exit()
+                sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Starts zone drawing or stops it if at least 3 points are pressed
             if interface.buttons[interface.new_zone_button].rect.collidepoint(event.pos):
@@ -77,8 +78,11 @@ def pygame_event_actions(interface):
                 interface.update_text(interface.delete_zones_button)
 
 
-            # Adds point to the zone to draw if the zone drawing is started and it's not on the dead zone
-            elif zone_drawing and not interface.dead_zone.collidepoint(event.pos):
+            # Adds point to the zone to draw if the zone drawing is started
+            # and it's neither on the dead zone or the zone recap
+            elif (zone_drawing
+                  and not interface.dead_zone.collidepoint(event.pos)
+                  and not interface.zone_recap.collidepoint(event.pos)):
                 print(f"{event.pos} added to the Zone")
                 points.append(event.pos)
 
