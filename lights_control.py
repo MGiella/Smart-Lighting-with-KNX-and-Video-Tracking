@@ -20,6 +20,7 @@ class Light:
 
         self._stop_light_off_event = multiprocessing.Event()
         self._light_off_process = multiprocessing.Process(target=self.light_off_timer)
+        self._light_off_process.daemon = True
         self._light_off_process.start()
 
         Light.lights.append(self)
@@ -49,7 +50,7 @@ class Light:
         """3 seconds timer that starts if the event is clear. After the execution is idle"""
         while True:
             while not self._stop_light_off_event.is_set():
-                time.sleep(5)
+                time.sleep(8)
                 asyncio.run(self.lights_update(0))
                 # Becomes idle
                 self._stop_light_off_event.set()

@@ -99,8 +99,8 @@ if __name__ == '__main__':
 
     # Opencv video capture
     cap = cv2.VideoCapture(get_camera_id())
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,monitor_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,monitor_height)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,1080)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
