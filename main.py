@@ -1,5 +1,6 @@
 import ast
 import sys
+from tkinter import Tk
 
 import cv2
 import pygame
@@ -91,10 +92,15 @@ if __name__ == '__main__':
     # Opencv DNN
     tracker = video_tracker.VideoTracker()
 
+    # Get screen resolution
+    root = Tk()
+    monitor_width = root.winfo_screenwidth()
+    monitor_height = root.winfo_screenheight()
+
     # Opencv video capture
     cap = cv2.VideoCapture(get_camera_id())
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,1080)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,monitor_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,monitor_height)
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
