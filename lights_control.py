@@ -6,8 +6,6 @@ import time
 from xknx import XKNX
 from xknx.devices import Switch
 
-
-
 class Light:
     lights = []
 

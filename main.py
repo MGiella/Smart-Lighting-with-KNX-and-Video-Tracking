@@ -5,7 +5,6 @@ from tkinter import Tk
 import cv2
 import pygame
 
-
 import video_tracker
 from pygame_interface import PygameInterface
 from zone import Zone
@@ -23,17 +22,17 @@ def get_camera_id():
 zone_drawing = False
 point = []
 
-
-def pygame_event_actions(interface):
+def pygame_event_actions(interface,tracker):
     """manage possible inputs and commands"""
     global zone_drawing, points
     for event in pygame.event.get():
         # Quits if is pressed q
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
+                pygame.quit()
                 cap.release()
                 cv2.destroyAllWindows()
-                pygame.quit()
+                tracker.stop()
                 sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Starts zone drawing or stops it if at least 3 points are pressed
@@ -51,13 +50,13 @@ def pygame_event_actions(interface):
 
             # Start video tracking
             elif interface.buttons[interface.start_tracking_button].rect.collidepoint(event.pos):
-                if not video_tracker.VideoTracker.started:
+                if not tracker.is_started():
                     print("Started video tracking\n")
-                    video_tracker.VideoTracker.start()
+                    tracker.start()
                     interface.update_text(interface.start_tracking_button)
                 else:
                     print("Stopped video tracking")
-                    video_tracker.VideoTracker.stop()
+                    tracker.stop()
                     interface.update_text(interface.start_tracking_button)
 
             elif interface.buttons[interface.load_zones_button].rect.collidepoint(event.pos):
@@ -89,24 +88,19 @@ def pygame_event_actions(interface):
 
 
 if __name__ == '__main__':
-    # Opencv DNN
+    # Started tracker
     tracker = video_tracker.VideoTracker()
-
-    # Get screen resolution
-    root = Tk()
-    monitor_width = root.winfo_screenwidth()
-    monitor_height = root.winfo_screenheight()
 
     # Opencv video capture
     cap = cv2.VideoCapture(get_camera_id())
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,1080)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     # Set pygame display
     interface = PygameInterface("Video Tracking System", width, height)
-    cont_no_one=0
+    cont_no_one = 0
     while True:
         # Read video frame from capture
         ret, frame = cap.read()
@@ -114,11 +108,11 @@ if __name__ == '__main__':
 
         # Adjust frame to pygame screen
         interface.adjust_frame(frame_rgb)
-        pygame_event_actions(interface)
+        pygame_event_actions(interface,tracker)
 
         # If there aren't people detected, after many frames
         # sends an empty list to the zone control
-        if video_tracker.VideoTracker.started:
+        if tracker.is_started():
             results = tracker.object_detection(frame, interface)
             if results is not None:
                 Zone.update_zone(results)
