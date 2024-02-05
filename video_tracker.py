@@ -1,12 +1,17 @@
 import multiprocessing
 from multiprocessing import JoinableQueue
 
-import Singleton
 from pygame_interface import PygameInterface
 from ultralytics import YOLO
 
-"""Video Tracker is a Singleton that manages the object detection"""
-class VideoTracker(metaclass=Singleton.Singleton):
+"""VideoTracker is a Singleton that manages the object detection"""
+
+
+class VideoTracker:
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super().__new__(cls)
+        return cls.instance
 
     def __init__(self):
         self._results = JoinableQueue()
@@ -14,7 +19,7 @@ class VideoTracker(metaclass=Singleton.Singleton):
         self._model = YOLO('yolov8n.pt')
         self._started = False
         self._create_processes(5)
-        self._frame_passed=0
+        self._frame_passed = 0
 
     def is_started(self):
         return self._started
@@ -28,22 +33,20 @@ class VideoTracker(metaclass=Singleton.Singleton):
         for child in children:
             child.terminate()
 
-
     def _process_results(self):
         """detect a person box and put it in results if the tracking was started"""
         while True:
-                results_box = []
-                if not self._jobs.empty():
-                    frame = self._jobs.get()
-                    model_results = self._model.predict(frame, True, verbose=False)
-                    for result in model_results:
-                        for box in result.boxes.data.tolist():
-                            x, y, w, h, score, class_id = box
-                            # class_id 0 is the person id, score is the accuracy of the prediction
-                            if class_id == 0 and score >= 0.5:
-                                results_box.append((x, y, w, h))
-                    self._results.put(results_box)
-
+            results_box = []
+            if not self._jobs.empty():
+                frame = self._jobs.get()
+                model_results = self._model.predict(frame, True, verbose=False)
+                for result in model_results:
+                    for box in result.boxes.data.tolist():
+                        x, y, w, h, score, class_id = box
+                        # class_id 0 is the person id, score is the accuracy of the prediction
+                        if class_id == 0 and score >= 0.5:
+                            results_box.append((x, y, w, h))
+                self._results.put(results_box)
 
     def _create_processes(self, concurrency):
         for _ in range(concurrency):
@@ -55,8 +58,8 @@ class VideoTracker(metaclass=Singleton.Singleton):
         """identifies the people that enters the frame, creates a box and
         put the center in the list """
         # The detection is made one time each 3 frame
-        self._frame_passed+=1
-        if self._frame_passed == 2:
+        self._frame_passed += 1
+        if self._frame_passed == 3:
             self._frame_passed = 0
             self._jobs.put(frame)
             centers = []

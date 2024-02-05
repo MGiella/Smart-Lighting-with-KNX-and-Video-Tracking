@@ -71,6 +71,7 @@ class Light:
                     asyncio.run(self.lights_update(0))
                     # Becomes idle
                     self._stop_light_off_event.set()
+                    i=0
 
     async def lights_update(self, new_state):
         """turns the light if the queue is empty. The queue is not empty when the switching off has to be stopped"""

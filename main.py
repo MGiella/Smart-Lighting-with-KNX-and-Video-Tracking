@@ -1,11 +1,10 @@
 import ast
 import sys
-from tkinter import Tk
 
 import cv2
 import pygame
 
-import video_tracker
+from video_tracker import VideoTracker
 from pygame_interface import PygameInterface
 from zone import Zone
 
@@ -82,14 +81,14 @@ def pygame_event_actions(interface,tracker):
             # and it's neither on the dead zone or the zone recap
             elif (zone_drawing
                   and not interface.dead_zone.collidepoint(event.pos)
-                  and not interface.zone_recap.collidepoint(event.pos)):
+                  and not interface.zones_recap.collidepoint(event.pos)):
                 print(f"{event.pos} added to the Zone")
                 points.append(event.pos)
 
 
 if __name__ == '__main__':
     # Started tracker
-    tracker = video_tracker.VideoTracker()
+    tracker = VideoTracker()
 
     # Opencv video capture
     cap = cv2.VideoCapture(get_camera_id())
@@ -108,7 +107,7 @@ if __name__ == '__main__':
 
         # Adjust frame to pygame screen
         interface.adjust_frame(frame_rgb)
-        pygame_event_actions(interface,tracker)
+        pygame_event_actions(interface, tracker)
 
         # If there aren't people detected, after many frames
         # sends an empty list to the zone control
@@ -116,6 +115,7 @@ if __name__ == '__main__':
             results = tracker.object_detection(frame, interface)
             if results is not None:
                 Zone.update_zone(results)
+                cont_no_one = 0
             else:
                 cont_no_one += 1
                 if cont_no_one >= 300:
