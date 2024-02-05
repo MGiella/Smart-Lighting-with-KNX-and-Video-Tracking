@@ -66,7 +66,7 @@ class PygameInterface:
         self.draw_dead_zone()
         self.draw_buttons(self.buttons.values())
         pygame.display.flip()
-        self.boxes = []
+
     def create_buttons(self):
         """creates the buttons for the interface"""
         buttons = {}
@@ -165,6 +165,7 @@ class PygameInterface:
         """draws the boxes on the interface"""
         for box in self.boxes:
             self.draw_empty_rectangle(box, (0, 0, 255), 1)
+        self.boxes = []
     def draw_empty_rectangle(self, points, color, widht):
         """draws a polygon using the points"""
         current_point = first_point = points[0]
