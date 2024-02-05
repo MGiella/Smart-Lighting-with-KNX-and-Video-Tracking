@@ -90,6 +90,7 @@ def pygame_event_actions(interface,tracker):
                   and not interface.zones_recap.collidepoint(event.pos)):
                 print(f"{event.pos} added to the Zone")
                 points.append(event.pos)
+                interface.add_point(event.pos)
 
 
 if __name__ == '__main__':
