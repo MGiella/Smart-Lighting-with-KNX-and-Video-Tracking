@@ -1,9 +1,11 @@
 import ast
+import ctypes
 import sys
 
 import cv2
 import pygame
 
+import camera
 from video_tracker import VideoTracker
 from pygame_interface import PygameInterface
 from zone import Zone
@@ -15,6 +17,11 @@ def get_camera_id():
         camera_id = file.readline()
         # if the camera is local, it's an int value, otherwise it's a string
         if len(camera_id) <= 1: camera_id = int(camera_id)
+
+    #PTZ CAM
+    if camera_id == "rtsp://192.168.4.36/11":
+        camera.Camera("192.168.4.36","admin","Casa1234")
+
     return camera_id
 
 
@@ -89,16 +96,18 @@ if __name__ == '__main__':
     # Started tracker
     tracker = VideoTracker()
 
+    # Get screen resolution
+    user32 = ctypes.windll.user32
+    screen_width = user32.GetSystemMetrics(0)
+    screen_height = user32.GetSystemMetrics(1)
+
     # Opencv video capture
     cap = cv2.VideoCapture(get_camera_id())
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-    width = 1080
-    height = 720
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, screen_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, screen_height)
 
     # Created Pygame Interface
-    interface = PygameInterface("Video Tracking System", width, height)
+    interface = PygameInterface("Video Tracking System", screen_width, screen_height)
 
     while True:
         # Read video frame from capture

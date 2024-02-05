@@ -20,6 +20,7 @@ class PygameInterface:
         self._screen = pygame.display.set_mode((width, height))
         self._zones = []
         self._boxes = []
+        self._points = []
 
         # Font size adapts to screen height
         self.font_size = int(22 * self.height / 720)
@@ -92,6 +93,7 @@ class PygameInterface:
         self._screen.blit(mirrored_image, (0, 0))
 
         # Updates pygame display, the order represents layering
+        self.draw_points()
         self.draw_zones()
         self.draw_boxes()
         self.draw_zone_recap()
@@ -167,6 +169,7 @@ class PygameInterface:
         pos_y = len(self._zones) * (recap_height + margin)
         zone = self.Zone(zone_name, self._font, zone_polygon, zone_light, pos_x, pos_y, recap_width, recap_height)
         self._zones.append(zone)
+        self._points=[]
 
     def delete_zones(self):
         """removes all the zones on the interface"""
@@ -229,3 +232,10 @@ class PygameInterface:
         for zone in self._zones:
             button_to_draw.append(zone.recap)
         self.draw_buttons(button_to_draw)
+
+    def add_point(self,position):
+        self._points.append(position)
+
+    def draw_points(self):
+        for point in self._points:
+            pygame.draw.circle(self._screen,(255,0,0),point,self.font_size/3)

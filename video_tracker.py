@@ -29,9 +29,7 @@ class VideoTracker:
 
     def stop(self):
         self._started = False
-        children = multiprocessing.active_children()
-        for child in children:
-            child.terminate()
+
 
     def _process_results(self):
         """detect a person box and put it in results if the tracking was started"""
