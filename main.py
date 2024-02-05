@@ -31,7 +31,6 @@ def pygame_event_actions(interface,tracker):
                 pygame.quit()
                 cap.release()
                 cv2.destroyAllWindows()
-                tracker.stop()
                 sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Starts zone drawing or stops it if at least 3 points are pressed
@@ -94,12 +93,13 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(get_camera_id())
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
     width = 1080
     height = 720
 
-    # Set pygame display
+    # Created Pygame Interface
     interface = PygameInterface("Video Tracking System", width, height)
-    cont_no_one = 0
+
     while True:
         # Read video frame from capture
         ret, frame = cap.read()
@@ -113,11 +113,5 @@ if __name__ == '__main__':
         # sends an empty list to the zone control
         if tracker.is_started():
             results = tracker.object_detection(frame, interface)
-            if results is not None:
-                Zone.update_zone(results)
-                cont_no_one = 0
-            else:
-                cont_no_one += 1
-                if cont_no_one >= 300:
-                    Zone.update_zone([])
-                    cont_no_one = 0
+            Zone.update_zone(results)
+

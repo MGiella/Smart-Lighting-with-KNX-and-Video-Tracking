@@ -57,9 +57,9 @@ class VideoTracker:
     def object_detection(self, frame, interface: PygameInterface):
         """identifies the people that enters the frame, creates a box and
         put the center in the list """
-        # The detection is made one time each 3 frame
+        # The detection is made one time each 3 frame, has to be 3 otherwise doesn't work
         self._frame_passed += 1
-        if self._frame_passed == 3:
+        if self._frame_passed == 2:
             self._frame_passed = 0
             self._jobs.put(frame)
             centers = []
@@ -71,8 +71,6 @@ class VideoTracker:
                     center = ((x + w / 2), (y + h / 2))
                     centers.append(center)
                     interface.create_box(x, y, w, h)
-
             return centers
-
         else:
             return []
