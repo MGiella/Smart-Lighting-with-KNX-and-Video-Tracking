@@ -118,6 +118,6 @@ if __name__ == '__main__':
                 Zone.update_zone(results)
             else:
                 cont_no_one += 1
-                if cont_no_one >= 100:
+                if cont_no_one >= 300:
                     Zone.update_zone([])
                     cont_no_one = 0

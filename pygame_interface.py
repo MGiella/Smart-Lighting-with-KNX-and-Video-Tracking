@@ -41,14 +41,18 @@ class PygameInterface:
                 self.rendered_text_changed = new_text
     class Zone:
         """Zone object with a polygon that will be drawn and a recap"""
-        def __init__(self,name,font,polygon,light,pos_x,pos_y,width,height):
+        def __init__(self, name, font, polygon, light, pos_x, pos_y, width, height):
             self.polygon = polygon
             self.light = light
             self.font = font
+            self.name = name
             #creates a random color for the text and the zone polygon
             self.color = (random.randint(0, 255),random.randint(0, 199),random.randint(0, 255))
-            self.text_render = self.font.render(f"{name} {self.light.address}", True, self.color)
+            self.text_render = self.font.render(f"{self.name} {self.light.address} {self.light.state}", True, self.color)
             self.recap = PygameInterface.Button(pos_x,pos_y,width,height,self.text_render)
+        def update(self):
+            self.text_render = self.font.render(f"{self.name} {self.light.address} {self.light.state}", True, self.color)
+            self.recap.rendered_text_default = self.text_render
 
     def adjust_frame(self, frame_rgb):
         """set the frame on pygame display"""
@@ -150,6 +154,8 @@ class PygameInterface:
         for zone in self.zones:
             points = list(zone.polygon.exterior.coords)
             self.draw_empty_rectangle(points, zone.color, 4)
+            zone.update()
+
     def update_text(self, button):
         """updates the text of the button clicked"""
         if button in self.buttons:
