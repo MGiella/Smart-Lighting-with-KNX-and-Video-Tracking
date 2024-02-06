@@ -20,6 +20,7 @@ class PygameInterface:
         self._screen = pygame.display.set_mode((width, height))
         self._zones = []
         self._boxes = []
+        self._boxes_centers = []
         self._points = []
 
         # Font size adapts to screen height
@@ -169,7 +170,7 @@ class PygameInterface:
         pos_y = len(self._zones) * (recap_height + margin)
         zone = self.Zone(zone_name, self._font, zone_polygon, zone_light, pos_x, pos_y, recap_width, recap_height)
         self._zones.append(zone)
-        self._points=[]
+        self._points = []
 
     def delete_zones(self):
         """removes all the zones on the interface"""
@@ -194,13 +195,17 @@ class PygameInterface:
     def create_box(self, x, y, w, h):
         """creates the box that track the person"""
         rectangle = [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+        self._boxes_centers.append(((x + w / 2), (y + h / 2)))
         self._boxes.append(rectangle)
 
     def draw_boxes(self):
         """draws the boxes on the interface"""
         for box in self._boxes:
             self.draw_empty_rectangle(box, (0, 0, 255), 1)
+        for center in self._boxes_centers:
+            pygame.draw.circle(self._screen, (0, 0, 255), center, self.font_size / 3)
         self._boxes = []
+        self._boxes_centers = []
 
     def draw_empty_rectangle(self, points, color, width):
         """draws a polygon using the points"""
@@ -233,9 +238,9 @@ class PygameInterface:
             button_to_draw.append(zone.recap)
         self.draw_buttons(button_to_draw)
 
-    def add_point(self,position):
+    def add_point(self, position):
         self._points.append(position)
 
     def draw_points(self):
         for point in self._points:
-            pygame.draw.circle(self._screen,(255,0,0),point,self.font_size/3)
+            pygame.draw.circle(self._screen, (255, 0, 0), point, self.font_size/3)

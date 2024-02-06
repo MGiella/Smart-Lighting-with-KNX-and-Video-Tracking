@@ -1,7 +1,7 @@
+import sys
+
 import requests
 from requests.auth import HTTPBasicAuth
-
-log = 'LOG(amera.py): '
 
 
 class Camera:
@@ -12,14 +12,15 @@ class Camera:
         self.MINSPEED = 1
         self.MAXSPEED = 65
 
+
+        # Check if the camera can connect via http
         url = 'http://' + self._ip + '/cgi-bin/hi3510/param.cgi?cmd=getnetattr'
         try:
-            response = requests.get(url, auth=HTTPBasicAuth(self._user, self._password))
-            print(log + str(response.status_code))
+            requests.get(url, auth=HTTPBasicAuth(self._user, self._password))
         except Exception as ex:
             print(ex)
+            sys.exit()
 
-    # Stampa della telecamera
     def __str__(self):
         return str({'IP': self._ip,
                     'user': self._user,
