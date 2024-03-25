@@ -1,4 +1,4 @@
-Questo progetto è stato sviluppato ai fini di una tesi di ricerca per la laurea triennale in Informatica, permette all'utente di interagire con un'installazione KNX, 
+Il sistema proposto permette all'utente di interagire con un'installazione KNX, 
 tramite collegamento automatico ad un interfaccia IP KNX, collegata alla stessa LAN alla quale è collegato il computer su cui è in esecuzione il programma (in caso questo non sia possibile, è
 necessaria l'esecuzione di un installazione virtuale con KNX Virtual (https://www.knx.org/knx-it/per-i-professionisti/per-iniziare/knx-virtual/?gad_source=1&gclid=Cj0KCQjwwYSwBhDcARIsAOyL0fgnGJWkEsH5wsR7AGqHytFXsiJCchmgILpxtVSFpkSJbzGpBJQ-i6EaAktFEALw_wcB).
 Il sistema implementa un sistema di Smart Lighting, utilizzando come sensore una telecamera alla quale è possibile connettersi tramite protocollo RTSP, questa è selezionata dal file di testo dove è specificato l'URL RTSP. Inoltre è possibile utilizzare una webcam o una telecamera collegata al computer specificandone la sorgente.
