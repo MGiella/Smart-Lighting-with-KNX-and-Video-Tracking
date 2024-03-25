@@ -1,40 +1,62 @@
 import ast
+import ctypes
 import sys
-from tkinter import Tk
 
 import cv2
 import pygame
 
-
-import video_tracker
+from PTZ.camera import Camera
+from PTZ.ptz_controller import CameraController
+from video_tracker import VideoTracker
 from pygame_interface import PygameInterface
 from zone import Zone
 
 
 def get_camera_id():
-    """get camera id from camera_id.txt"""
+    """get camera rtsp URL from camera_id.txt, 0 is the webcam"""
     with open("camera_id.txt", "r") as file:
         camera_id = file.readline()
         # if the camera is local, it's an int value, otherwise it's a string
         if len(camera_id) <= 1: camera_id = int(camera_id)
-    return camera_id
+
+    # PTZ CAM
+    if camera_id == "rtsp://192.168.1.123/12":
+        mycam = Camera("192.168.1.123", "admin", "Casa1234")
+        controller = CameraController(mycam)
+        return camera_id, controller
+    return camera_id, None
 
 
 zone_drawing = False
 point = []
 
 
-def pygame_event_actions(interface):
+def pygame_event_actions(interface, tracker, controller=None):
     """manage possible inputs and commands"""
     global zone_drawing, points
     for event in pygame.event.get():
         # Quits if is pressed q
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
+                pygame.quit()
                 cap.release()
                 cv2.destroyAllWindows()
-                pygame.quit()
                 sys.exit()
+            # if the controller was initialized, manages the movement of the camera
+            elif event.key == pygame.K_w and controller != None:
+                controller.move_up()
+            elif event.key == pygame.K_d and controller != None:
+                controller.move_right()
+            elif event.key == pygame.K_s and controller != None:
+                controller.move_down()
+            elif event.key == pygame.K_a and controller != None:
+                controller.move_left()
+            elif event.key == pygame.K_UP and controller != None:
+                controller.zoom_in()
+            elif event.key == pygame.K_DOWN and controller != None:
+                controller.zoom_out()
+        if event.type == pygame.KEYUP and controller != None:
+            controller.stop()
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Starts zone drawing or stops it if at least 3 points are pressed
             if interface.buttons[interface.new_zone_button].rect.collidepoint(event.pos):
@@ -51,13 +73,13 @@ def pygame_event_actions(interface):
 
             # Start video tracking
             elif interface.buttons[interface.start_tracking_button].rect.collidepoint(event.pos):
-                if not video_tracker.VideoTracker.started:
+                if not tracker.is_started():
                     print("Started video tracking\n")
-                    video_tracker.VideoTracker.start()
+                    tracker.start()
                     interface.update_text(interface.start_tracking_button)
                 else:
                     print("Stopped video tracking")
-                    video_tracker.VideoTracker.stop()
+                    tracker.stop()
                     interface.update_text(interface.start_tracking_button)
 
             elif interface.buttons[interface.load_zones_button].rect.collidepoint(event.pos):
@@ -83,47 +105,41 @@ def pygame_event_actions(interface):
             # and it's neither on the dead zone or the zone recap
             elif (zone_drawing
                   and not interface.dead_zone.collidepoint(event.pos)
-                  and not interface.zone_recap.collidepoint(event.pos)):
+                  and not interface.zones_recap.collidepoint(event.pos)):
                 print(f"{event.pos} added to the Zone")
                 points.append(event.pos)
+                interface.add_point(event.pos)
 
 
 if __name__ == '__main__':
-    # Opencv DNN
-    tracker = video_tracker.VideoTracker()
+    # Started tracker
+    tracker = VideoTracker()
 
     # Get screen resolution
-    root = Tk()
-    monitor_width = root.winfo_screenwidth()
-    monitor_height = root.winfo_screenheight()
+    #user32 = ctypes.windll.user32
+    #screen_width = user32.GetSystemMetrics(0)
+    #screen_height = user32.GetSystemMetrics(1)
 
     # Opencv video capture
-    cap = cv2.VideoCapture(get_camera_id())
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,1080)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    camera_id, controller = get_camera_id()
+    cap = cv2.VideoCapture(camera_id)
+    screen_width, screen_height = cap.get(cv2.CAP_PROP_FRAME_WIDTH),cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-    # Set pygame display
-    interface = PygameInterface("Video Tracking System", width, height)
-    cont_no_one=0
+    # Created Pygame Interface
+    interface = PygameInterface("Video Tracking System", screen_width, screen_height)
+
     while True:
         # Read video frame from capture
         ret, frame = cap.read()
+        #frame = cv2.resize(frame, (screen_width, screen_height))
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Adjust frame to pygame screen
         interface.adjust_frame(frame_rgb)
-        pygame_event_actions(interface)
+        pygame_event_actions(interface, tracker, controller)
 
         # If there aren't people detected, after many frames
         # sends an empty list to the zone control
-        if video_tracker.VideoTracker.started:
+        if tracker.is_started():
             results = tracker.object_detection(frame, interface)
-            if results is not None:
-                Zone.update_zone(results)
-            else:
-                cont_no_one += 1
-                if cont_no_one >= 100:
-                    Zone.update_zone([])
-                    cont_no_one = 0
+            Zone.update_zone(results)

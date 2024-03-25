@@ -1,0 +1,6 @@
+requests~=2.31.0
+opencv-python~=4.9.0.80
+pygame~=2.5.2
+shapely~=2.0.2
+ultralytics~=8.1.8
+xknx~=2.11.2

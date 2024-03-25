@@ -1,5 +1,5 @@
 import math
-from shapely import Polygon, Point
+from shapely import Polygon
 
 import lights_control
 from pygame_interface import PygameInterface
@@ -8,12 +8,14 @@ from pygame_interface import PygameInterface
 class Zone:
     zones = {}
     people_in_zone = {}
+    collider_borders = 50
 
     def __init__(self, points):
         ordered_points = self.order_points_clockwise(points)
         self.zone_polygon = Polygon(ordered_points)
         self.people_count = 0
         self.light = lights_control.Light()
+
 
     def __str__(self):
         l = list(self.zone_polygon.exterior.coords)
@@ -28,6 +30,15 @@ class Zone:
 
         self.people_count = people
         Zone.zones[self] = self.people_count
+
+    def contains(self, point):
+        """return True if the polygon intersects the square created by the center given"""
+        x,y = point
+        borders = Zone.collider_borders
+        collide = Polygon([(x-borders,y-borders),(x-borders,y+borders),(x+borders,y+borders),(x+borders,y-borders)])
+        return self.zone_polygon.intersects(collide)
+
+
 
     @classmethod
     def create_zone(cls, points: list, interface: PygameInterface):
@@ -51,7 +62,7 @@ class Zone:
             cls.people_in_zone[zone] = 0
             if points:
                 for point in points:
-                    if zone.zone_polygon.contains(Point(point)):
+                    if zone.contains(point):
                         cls.people_in_zone[zone] += 1
                     else:
                         cls.people_in_zone[zone] = 0
