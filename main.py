@@ -13,7 +13,7 @@ from zone import Zone
 
 
 def get_camera_id():
-    """get camera id from camera_id.txt"""
+    """get camera rtsp URL from camera_id.txt, 0 is the webcam"""
     with open("camera_id.txt", "r") as file:
         camera_id = file.readline()
         # if the camera is local, it's an int value, otherwise it's a string
@@ -116,13 +116,14 @@ if __name__ == '__main__':
     tracker = VideoTracker()
 
     # Get screen resolution
-    user32 = ctypes.windll.user32
-    screen_width = user32.GetSystemMetrics(0)
-    screen_height = user32.GetSystemMetrics(1)
+    #user32 = ctypes.windll.user32
+    #screen_width = user32.GetSystemMetrics(0)
+    #screen_height = user32.GetSystemMetrics(1)
 
     # Opencv video capture
     camera_id, controller = get_camera_id()
     cap = cv2.VideoCapture(camera_id)
+    screen_width, screen_height = cap.get(cv2.CAP_PROP_FRAME_WIDTH),cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     # Created Pygame Interface
     interface = PygameInterface("Video Tracking System", screen_width, screen_height)
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     while True:
         # Read video frame from capture
         ret, frame = cap.read()
-        frame = cv2.resize(frame, (screen_width, screen_height))
+        #frame = cv2.resize(frame, (screen_width, screen_height))
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Adjust frame to pygame screen

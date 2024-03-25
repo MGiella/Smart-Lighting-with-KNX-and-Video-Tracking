@@ -13,9 +13,6 @@ class Light:
     def __init__(self):
         self.address = "0/0/" + str(len(Light.lights) + 1)
         self.status_address = "0/1/" + str(len(Light.lights) + 1)
-        # state is a lock
-        self._state_lock = multiprocessing.Queue(1)
-
         self._stop_light_off_event = multiprocessing.Event()
         self._state = multiprocessing.Event()
 
